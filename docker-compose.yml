@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+
+  captcha:
+    container_name: captcha
+    image: eclipse-temurin:17-jdk-alpine
+    volumes:
+      - ./captcha-service:/mvn
+    ports:
+      - 5001:8080
+    working_dir: /mvn
+    command: ./mvnw spring-boot:run
+    environment:
+      M2_HOME: /mvn/.mvn/m2
+
+  backend:
+    container_name: backend
+    image: eclipse-temurin:17-jdk-alpine
+    volumes:
+      - ./backend:/mvn
+    ports:
+      - 5000:8080
+    working_dir: /mvn
+    command: ./mvnw spring-boot:run
+    environment:
+      M2_HOME: /mvn/.mvn/m2
+    depends_on:
+      - captcha
+      - postgres
+
+  postgres:
+    container_name: db
+    image: postgres:13.1-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=captchaservice
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - 5003:8080
+
+  frontend:
+    container_name: frontend
+    image: frontend
+    build:
+      context: ./frontend
+      target: development # change when in production
+    volumes:
+      - ./frontend/src:/app/src
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    command: npm run test && npm start

@@ -1,0 +1,23 @@
+.user-data-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* align-items: center; */
+}
+
+.data-label-wrapper {
+    display: flex;
+    /* align-items: center; */
+}
+
+.propic {
+    width: 220px;
+    border-radius: 400px;
+    margin-bottom: 8vh;
+}
+
+.user-data-label {
+    font-weight: bold;
+    margin-bottom: 2vh;
+    margin-right: 4vw;
+}
