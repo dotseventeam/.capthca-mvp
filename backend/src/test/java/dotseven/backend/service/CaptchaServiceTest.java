@@ -11,168 +11,189 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+
 class CaptchaServiceTest {
 
-    RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private RestTemplate restTemplate;
 
-    CaptchaService captchaService;
+    private CaptchaService captchaService;
+
 
     @BeforeEach
     void setUp() {
 
         // Arrange
-        captchaService = new CaptchaService(restTemplate);
+        this.restTemplate = Mockito.mock(RestTemplate.class);
+        this.captchaService = new CaptchaService(this.restTemplate);
     }
 
     @Test
-    void checkCaptcha_unreachable() {
+    void getNewCaptcha_fail_WithException() {
 
         // Arrange
-        ResponseEntity<Boolean> mockResponse = new ResponseEntity<>(Boolean.FALSE, HttpStatus.valueOf(500));
-
-        when(restTemplate.postForEntity(
-                Mockito.anyString(),
-                Mockito.any(HttpEntity.class),
-                Mockito.eq(Boolean.class))
-        ).thenReturn(mockResponse);
+        Mockito.when(restTemplate.postForEntity(
+                        Mockito.anyString(),
+                        Mockito.any(HttpEntity.class),
+                        Mockito.eq(CaptchaRequest.class)))
+                .thenThrow(new RuntimeException(
+                        "Some exception occurred calling \"restTemplate.postForEntity\""
+                ));
 
         // Act
-        try {
-            captchaService.checkCaptcha("", List.of(""));
+        Optional<CaptchaRequest> result = captchaService.getNewCaptcha();
 
         // Assert
-            fail("Exception should have been thrown");
-        } catch (RuntimeException ex) {
-            assertEquals("Unreachable Service", ex.getMessage());
-        }
-
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void checkCaptcha_unauthorized() {
+    void getNewCaptcha_fail_InternalServerError() {
 
         // Arrange
-        ResponseEntity<Boolean> mockResponse = new ResponseEntity<>(Boolean.FALSE, HttpStatus.UNAUTHORIZED);
+        Mockito.when(restTemplate.postForEntity(
+                Mockito.anyString(),
+                Mockito.any(HttpEntity.class),
+                Mockito.eq(CaptchaRequest.class))
+        ).thenReturn(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        when(restTemplate.postForEntity(
+        // Act
+        Optional<CaptchaRequest> result = captchaService.getNewCaptcha();
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getNewCaptcha_fail_Unauthorized() {
+
+        // Arrange
+        Mockito.when(restTemplate.postForEntity(
+                Mockito.anyString(),
+                Mockito.any(HttpEntity.class),
+                Mockito.eq(CaptchaRequest.class))
+        ).thenReturn(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+
+        // Act
+        Optional<CaptchaRequest> result = captchaService.getNewCaptcha();
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getNewCaptcha_success() {
+
+        // Arrange
+        CaptchaRequest mockCaptcha = new CaptchaRequest(
+                "testToken",
+                "testImage",
+                Collections.nCopies(8, "testAns")
+        );
+        Mockito.when(restTemplate.postForEntity(
+                Mockito.anyString(),
+                Mockito.any(HttpEntity.class),
+                Mockito.eq(CaptchaRequest.class))
+        ).thenReturn(ResponseEntity
+                .ok()
+                .body(mockCaptcha)
+        );
+
+        // Act
+        Optional<CaptchaRequest> result = captchaService.getNewCaptcha();
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(mockCaptcha, result.get());
+    }
+
+
+    @Test
+    void checkCaptcha_fail_WithException() {
+
+        // Arrange
+        Mockito.when(restTemplate.postForEntity(
+                        Mockito.anyString(),
+                        Mockito.any(HttpEntity.class),
+                        Mockito.eq(Boolean.class)))
+                .thenThrow(new RuntimeException(
+                        "Some exception occurred calling \"restTemplate.postForEntity\""
+                ));
+
+        // Act
+        Optional<Boolean> result = captchaService.checkCaptcha(
+                "testToken",
+                Collections.nCopies(2, "testAns"));
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void checkCaptcha_fail_InternalServerError() {
+
+        // Arrange
+        Mockito.when(restTemplate.postForEntity(
                 Mockito.anyString(),
                 Mockito.any(HttpEntity.class),
                 Mockito.eq(Boolean.class))
-        ).thenReturn(mockResponse);
+        ).thenReturn(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 
         // Act
-        try {
-            captchaService.checkCaptcha("", List.of(""));
+        Optional<Boolean> result = captchaService.checkCaptcha(
+                "testToken",
+                Collections.nCopies(2, "testAns"));
 
-            // Assert
-            fail("Exception should have been thrown");
-        } catch (RuntimeException ex) {
-            assertEquals("Expired Credentials", ex.getMessage());
-        }
-
+        // Assert
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void checkCaptcha_goodRequest() {
+    void checkCaptcha_fail_Unauthorized() {
 
         // Arrange
-        ResponseEntity<Boolean> mockResponse = new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-
-        when(restTemplate.postForEntity(
+        Mockito.when(restTemplate.postForEntity(
                 Mockito.anyString(),
                 Mockito.any(HttpEntity.class),
                 Mockito.eq(Boolean.class))
-        ).thenReturn(mockResponse);
+        ).thenReturn(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
 
         // Act
-        try {
-            boolean result = captchaService.checkCaptcha("", List.of(""));
+        Optional<Boolean> result = captchaService.checkCaptcha(
+                "testToken",
+                Collections.nCopies(2, "testAns"));
 
-            // Assert
-            assertTrue(result);
-        } catch (Exception ex) {
-            fail("Exception should not have been thrown");
-        }
-
+        // Assert
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void getNewCaptcha_unreachable() {
+    void checkCaptcha_success() {
 
         // Arrange
-        CaptchaRequest mockRequest = new CaptchaRequest();
-        ResponseEntity<CaptchaRequest> mockResponse = new ResponseEntity<>(mockRequest, HttpStatus.valueOf(500));
-
-        when(restTemplate.postForEntity(
+        Boolean mockResult = Boolean.TRUE;
+        Mockito.when(restTemplate.postForEntity(
                 Mockito.anyString(),
                 Mockito.any(HttpEntity.class),
-                Mockito.eq(CaptchaRequest.class))
-        ).thenReturn(mockResponse);
+                Mockito.eq(Boolean.class))
+        ).thenReturn(ResponseEntity
+                .ok()
+                .body(mockResult)
+        );
 
         // Act
-        try {
-            captchaService.getNewCaptcha();
+        Optional<Boolean> result = captchaService.checkCaptcha(
+                "testToken",
+                Collections.nCopies(2, "testAns"));
 
-            // Assert
-            fail("Exception should have been thrown");
-        } catch (RuntimeException ex) {
-            assertEquals("Unreachable Service", ex.getMessage());
-        }
-
-    }
-
-    @Test
-    void getNewCaptcha_unauthorized() {
-
-        // Arrange
-        CaptchaRequest mockRequest = new CaptchaRequest();
-        ResponseEntity<CaptchaRequest> mockResponse = new ResponseEntity<>(mockRequest, HttpStatus.UNAUTHORIZED);
-
-        when(restTemplate.postForEntity(
-                Mockito.anyString(),
-                Mockito.any(HttpEntity.class),
-                Mockito.eq(CaptchaRequest.class))
-        ).thenReturn(mockResponse);
-
-        // Act
-        try {
-            captchaService.getNewCaptcha();
-
-            // Assert
-            fail("Exception should have been thrown");
-        } catch (RuntimeException ex) {
-            assertEquals("Expired Credentials", ex.getMessage());
-        }
-
-    }
-
-    @Test
-    void getNewCaptcha_goodRequest() {
-
-        // Arrange
-        CaptchaRequest mockRequest = new CaptchaRequest();
-        ResponseEntity<CaptchaRequest> mockResponse = new ResponseEntity<>(mockRequest, HttpStatus.OK);
-
-        when(restTemplate.postForEntity(
-                Mockito.anyString(),
-                Mockito.any(HttpEntity.class),
-                Mockito.eq(CaptchaRequest.class))
-        ).thenReturn(mockResponse);
-
-        // Act
-        try {
-            CaptchaRequest result = captchaService.getNewCaptcha();
-
-            // Assert
-            assertEquals(result, mockRequest);
-        } catch (Exception ex) {
-            fail("Exception should not have been thrown");
-        }
-
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(mockResult, result.get());
     }
 }

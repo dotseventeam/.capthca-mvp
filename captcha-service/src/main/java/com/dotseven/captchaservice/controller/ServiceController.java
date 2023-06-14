@@ -52,7 +52,6 @@ public class ServiceController {
         if (appId != null && appSecret != null && cryptoToken != null && !userAnswers.isEmpty()) {
             if (authService.authenticate(appId, appSecret)) {
                 Token token = Token.decrypt(cryptoToken);
-                // System.out.println("\n\ntoken nullo: "+token == null);
                 if (token == null || token.getExpiryTime().isBefore(LocalDateTime.now())) {
                     return false;
                 }

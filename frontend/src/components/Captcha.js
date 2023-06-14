@@ -21,6 +21,7 @@ export default function Captcha({
 
     useEffect(() => {
         setOptions(captcha["captchaOptions"]);
+        uncheckOptions();
     }, [captcha]);
 
     const openDialog = async (e) => {
@@ -58,7 +59,6 @@ export default function Captcha({
             .catch((err) => {
                 console.log(err);
             });
-        console.log('captcha refreshed')
     }
 
     const toggleChecked = (index) => {

@@ -1,9 +1,11 @@
 package dotseven.backend.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,26 +23,24 @@ import dotseven.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	@Autowired
-	private UserService userService;
+	private final UserService userService;
 
-	@Autowired
-	private AuthenticationManager authManager;
+	private final AuthenticationManager authManager;
 
-	@Autowired
-	private CaptchaService captchaService;
+	private final CaptchaService captchaService;
 
-	@Autowired
-	private TokenProvider tokenProvider;
+	private final TokenProvider tokenProvider;
 
 	@CrossOrigin(origins = "http://localhost:3000")
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> login(@Valid @RequestBody AuthRequest authRequest) {
 
- 		if (!captchaService.checkCaptcha(authRequest.getCaptchaToken(), authRequest.getCaptchaAnswers())) {
+		Optional<Boolean> captchaValidationResult = captchaService.checkCaptcha(authRequest.getCaptchaToken(), authRequest.getCaptchaAnswers());
+		if (captchaValidationResult.isEmpty() || !captchaValidationResult.get().booleanValue()) {
 			ErrorResponse response = new ErrorResponse("Captcha verification failed");
 			return ResponseEntity.status(422).body(response); // Unprocessable entity -> the captcha verification is
 																// unprocessable
@@ -53,29 +53,11 @@ public class AuthController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
-	@GetMapping("/logout")
-	public ResponseEntity<String> logout() {
-		// authService.revokeSession(sessionId);
-		return ResponseEntity.ok().body("hey, i'mm a string");
-	}
-
-	@CrossOrigin(origins = "http://localhost:3000")
-	@GetMapping("/secured")
-	public ResponseEntity<String> secured() {
-		// authService.revokeSession(sessionId);
-		return ResponseEntity.ok().body("hey, i'm secured");
-	}
 
 	private String authenticateAndGetToken(String username, String password) {
 		Authentication authentication = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(username, password));
 		return tokenProvider.generateToken(authentication);
-	}
-
-	@GetMapping("users")
-	public ResponseEntity<List<User>> listusers() {
-		return ResponseEntity.ok().body(userService.listusers());
 	}
 
 }

@@ -73,7 +73,6 @@ export default function Login({ cookies, setCookie, removeCookie }) {
                 if (response.status === 200) {
                     setSucces(true);
                     setCookie("jwtToken", response.data.jwtToken, { path: "/" });
-                    console.log(response.data.jwtToken);
                 }
             }).catch(() => {
                 setErrorMessage('Login failed. Try again.');
@@ -128,10 +127,10 @@ export default function Login({ cookies, setCookie, removeCookie }) {
                             />
                             <button className='form-submission-btn' onClick={handleSubmit}>Log In</button>
                         </form>
-                        <p>
+                        {/* <p>
                             Need an Account?&nbsp;
                             {<Link className="redirect" to="/signup">Sign Up</Link>}
-                        </p>
+                        </p> */}
                     </section>
                     <Footer />
                 </>

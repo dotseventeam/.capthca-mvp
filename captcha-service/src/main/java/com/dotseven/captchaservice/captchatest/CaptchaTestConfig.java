@@ -11,6 +11,7 @@ public class CaptchaTestConfig {
     @Bean
     CommandLineRunner commandLineRunnerCaptcha(
             CaptchaTestRepository repository) {
+
         return agrs -> {
             for (int i = 0; i < 100; i++) {
                 CaptchaTest captchaTest = new CaptchaTest();

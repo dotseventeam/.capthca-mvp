@@ -13,7 +13,14 @@ import java.util.List;
 
 @SpringBootTest(classes = CaptchaTest.class)
 public class CaptchaTestTests {
+    
     CaptchaTest captchaTest = new CaptchaTest();
+    
+    
+    @Test
+    public void componentsAreNotNull() {
+        assertNotNull(captchaTest);
+    }
     @Test
     public void testGetCorrectAnswersNumbers(){
         assertEquals(captchaTest.getCorrectAnswers().size(),2);

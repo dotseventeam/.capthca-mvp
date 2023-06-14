@@ -32,7 +32,6 @@ a.redirect:hover {
 }
 
 form input {
-    width: auto;
     padding: .8em 1.4em .8em 1.4em;
     width: 250px;
     border-radius: 1.5em;

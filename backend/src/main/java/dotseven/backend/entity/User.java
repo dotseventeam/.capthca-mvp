@@ -105,10 +105,6 @@ public class User {
 		return this.birthDate;
 	}
 
-	public String getEmail() {
-		return this.email;
-	}
-
 	public char getGender() {
 		return this.gender;
 	}
@@ -121,15 +117,7 @@ public class User {
 		this.passwordHash = passwordHash;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((username == null) ? 0 : username.hashCode());
-		result = prime * result + ((passwordHash == null) ? 0 : passwordHash.hashCode());
-		result = prime * result + ((email == null) ? 0 : email.hashCode());
-		return result;
-	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -156,40 +144,5 @@ public class User {
 		} else if (!email.equals(other.email))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("User{Username: ");
-		sb.append(username).append("\n");
-		sb.append("Password (not in clear, dummy): ").append(passwordHash).append("\n");
-		if (firstName != null) {
-			sb.append("First name: ").append(firstName).append("\n");
-		} else {
-			sb.append("First name: Unknown").append("\n");
-		}
-		if (lastName != null) {
-			sb.append("Last name: ").append(lastName).append("\n");
-		} else {
-			sb.append("Last name: Unknown").append("\n");
-		}
-		if (birthDate != null) {
-			sb.append("Date of birth: ").append(birthDate).append("\n");
-		} else {
-			sb.append("Date of birth: Unknown").append("\n");
-		}
-		sb.append("Email: ").append(email).append("\n");
-		if (gender != 'N') {
-			sb.append("Gender: ").append(gender).append("\n");
-		} else {
-			sb.append("Gender: Unknown").append("\n");
-		}
-		if (profilePicture != null) {
-			sb.append("URL of profile picture: ").append(profilePicture).append("\n");
-		} else {
-			sb.append("URL of profile picture: not found").append("\n");
-		}
-		sb.append("}");
-		return sb.toString();
 	}
 }

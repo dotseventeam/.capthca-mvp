@@ -2,21 +2,28 @@ package dotseven.backend.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
 public class AuthRequest {
 
-	@NotNull
-	private final String username;
 
+	public AuthRequest() {};
+	@JsonProperty
 	@NotNull
-	private final String passwordHash;
+	private  String username;
 
+	@JsonProperty
 	@NotNull
-	private final String captchaToken;
+	private  String passwordHash;
 
+	@JsonProperty
 	@NotNull
-	private final List<String> captchaAnswers;
+	private  String captchaToken;
+
+	@JsonProperty
+	@NotNull
+	private  List<String> captchaAnswers;
 
 	public AuthRequest(String username,
 			String passwordHash,

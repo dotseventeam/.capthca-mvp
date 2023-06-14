@@ -13,7 +13,6 @@ export default function Logout({ cookies, setCookie, removeCookie }) {
             axios
                 .get('http://localhost:5000/logout')
                 .then((response) => {
-                    console.log(response.data);
                 })
                 .catch((err) => {
                     console.log(err);

@@ -1,13 +1,17 @@
 package dotseven.backend.security;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-@Data
+
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
+
+    public UserDetailsImpl() {};
 
     private String password;
 

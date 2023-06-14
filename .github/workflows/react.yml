@@ -1,0 +1,19 @@
+name: React CI
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test
+        run: docker-compose up -d
+      - name: Test Integration Setup
+        run: npm ci
+        working-directory: frontend
+      - name: Sleep for 30seconds
+        run: sleep 30
+        shell: bash
+      - name: Test Integration 
+        run: npm test
+        working-directory: frontend
